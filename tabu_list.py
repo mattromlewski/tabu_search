@@ -24,6 +24,9 @@ class TabuList:
     def get_recency_memory(self):
         return dict(self._recency_mem)
 
+    def set_tabu_tenure(self, new_tenure):
+        self._tabu_tenure = new_tenure
+        
 if __name__ == "__main__":
     # test
     tabu = TabuList(5)

@@ -18,6 +18,8 @@ class CostMap:
     def get_cost_matrix(self):
         return self._cost_matrix
 
+    def set_cost_matrix(self, new_matrix):
+        self._cost_matrix = new_matrix
 
 if __name__ == "__main__":
     # test
