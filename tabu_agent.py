@@ -46,7 +46,9 @@ class TabuAgent:
         swapped = self._neighbour_swapped_components[neighbour_idx]
         neighbour_cost_map = np.array(self.mutate_cost_map(neighbour_idx))
         cost = np.sum(np.multiply(neighbour_cost_map, self._distances))/2.0
-        return cost
+        # get frequency penalty 
+        cost += self._tabu_list.get_frequency_penalty(swapped)
+        return cost 
 
     def mutate_solution(self, position_1, position_2) -> List[int]:
         neighbour = list(self._solution)
@@ -110,6 +112,11 @@ class TabuAgent:
             if self._neighbour_values[best_neighbour_idx] < self._min_solution_cost:
                 self._min_solution_cost = self._neighbour_values[best_neighbour_idx]
             iter += 1
+            # Update frequency memory
+            self._tabu_list.increment_frequency_memory(
+                self._neighbour_swapped_components[best_neighbour_idx]
+                )
+
             # change tabu tenure dynamically
             # if iter % 10 == 0:
             #     self._tabu_list.set_tabu_tenure(random.randrange(3,15))
