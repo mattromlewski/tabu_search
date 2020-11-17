@@ -18,8 +18,8 @@ class CostMap:
     def get_cost_matrix(self):
         return self._cost_matrix
 
-    
 
 if __name__ == "__main__":
+    # test
     map = CostMap("data/Flow.csv")
     print(map.get_cost_dict())

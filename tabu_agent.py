@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 
 from cost_map import CostMap
+from tabu_list import TabuList
 
 class TabuAgent:
     '''
@@ -12,7 +13,7 @@ class TabuAgent:
         self._neighbours = []   
         self._neighbour_values = []
         self._neighbour_swapped_components = []
-        self._tabu_tenure = tabu_tenure
+        self._tabu_list = TabuList(tabu_tenure)
         self._max_iterations = max_iterations
         self._best_solution_value = 0
         self._flows = CostMap("data/Flow.csv")
@@ -44,7 +45,7 @@ class TabuAgent:
         swapped = self._neighbour_swapped_components[neighbour_idx]
         neighbour_cost_map = np.array(self.mutate_cost_map(neighbour_idx))
         cost = np.sum(np.multiply(neighbour_cost_map, self._distances))/2.0
-        print(cost)
+        return cost
 
     def mutate_solution(self, position_1, position_2) -> List[int]:
         neighbour = list(self._solution)
@@ -62,8 +63,33 @@ class TabuAgent:
                 self._neighbour_values.append(self.calculate_cost(solution_idx))
                 solution_idx += 1
 
+    def select_best_neighbour(self):
+        '''
+        Rank based on cost value, choose best neighbour solution that is not in the tabu list
+        Return best neighbour's index  
+        '''
+        print(self._neighbour_values)
+        ranking = sorted(self._neighbour_values)
+        # search for first occuring swapped pair that does not occur in the tabu list:
+        searching = True
+        for val in ranking:
+            # find index of next best neighbour to obtain the swapped pair
+            neighbour_idx = self._neighbour_values.index(val)
+            swapped_pair = self._neighbour_swapped_components[neighbour_idx]
+            # check if tabu
+            if swapped_pair in self._tabu_list.get_recency_memory():
+                print("Swapped pair {} has a tabu value of {}".format(
+                    swapped_pair, self._tabu_list.get_recency_memory()[swapped_pair]
+                ))
+            else:
+                return neighbour_idx
+
+    
+
 if __name__ == "__main__":
     agent = TabuAgent([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],10,1000)
     init_cost = np.sum(np.multiply(np.array(agent._flows.get_cost_matrix()), agent._distances))/2.0
     print("initial cost ={}".format(init_cost))
     agent.generate_neighbours()
+    best_idx = agent.select_best_neighbour()
+    print("Best neighbour index: {} cost: {}".format(best_idx,agent._neighbour_values[best_idx]))
